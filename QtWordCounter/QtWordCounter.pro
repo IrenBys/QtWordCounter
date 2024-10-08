@@ -7,6 +7,7 @@ QT += core
 
 SOURCES += \
         WordCounter.cpp \
+        WordCounterThread.cpp \
         main.cpp
 
 RESOURCES += qml.qrc
@@ -23,4 +24,5 @@ else: unix:!android: target.path = /opt/$${TARGET}/bin
 !isEmpty(target.path): INSTALLS += target
 
 HEADERS += \
-    WordCounter.h
+    WordCounter.h \
+    WordCounterThread.h

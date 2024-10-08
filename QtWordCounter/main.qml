@@ -6,8 +6,8 @@ import com.example.WordCounter
 
 Window {
     id: appWindow
-    width: 420
-    height: 780
+    width: 400
+    height: 700
     visible: true
     title: qsTr("Word Counter")
 
@@ -16,19 +16,17 @@ Window {
     }
 
     Column {
-        anchors.fill : parent
+        anchors.horizontalCenter: parent.horizontalCenter
+        anchors.top: parent.top
+        padding: 10
         spacing: 10
 
         Row {
-            anchors.horizontalCenter: parent.horizontalCenter
-            anchors.top: parent.top
-            padding: 10
             spacing: 10
-
 
             Button {
                 id: openButton
-                width: appWindow.width * 0.3
+                width: appWindow.width/2 - 2 * parent.spacing
                 height: textButton.height * 1.5
                 padding: textButton.height * 0.6
 
@@ -100,6 +98,7 @@ Window {
 
                 onClicked: {
                     console.log("startButton")
+                    wordCounter.startProcessing()
                 }
 
             }
