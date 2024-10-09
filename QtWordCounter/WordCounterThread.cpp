@@ -1,27 +1,48 @@
-// WordCounterThread.cpp
 #include "WordCounterThread.h"
 
-// Конструктор класса WordCounterThread.
-// Инициализирует m_filePath значением filePath.
-WordCounterThread::WordCounterThread(const QString& filePath, QObject* parent)
-    : QThread(parent), m_filePath(filePath) {}
+WordCounterThread::WordCounterThread(QObject *parent)
+    : QThread(parent), m_cancel(false), progress_state(0) {}
 
-// Метод run() выполняется при запуске потока и выполняет задачи по чтению и обработке файла.
-void WordCounterThread::run() {
-    // Симулируем процесс чтения файла с помощью вывода сообщения в консоль.
-    qDebug() << "Чтение файла: " << m_filePath;
-
-    // Задержка в 2 секунды для симуляции времени, необходимого на чтение файла.
-    QThread::sleep(2);
-
-    // Симулируем процесс обработки файла с помощью вывода сообщения в консоль.
-    qDebug() << "Обработка файла";
-
-    // Задержка в 2 секунды для симуляции времени, необходимого на обработку данных.
-    QThread::sleep(2);
-
-    // Испускаем сигнал, чтобы уведомить об окончании обработки.
-    emit processingFinished();
+WordCounterThread::~WordCounterThread() {
+    stop();
+    wait(); // Ожидаем завершения потока.
 }
 
+void WordCounterThread::setFilePath(const QString &filePath) {
+    m_filePath = filePath;
+}
 
+void WordCounterThread::stop() {
+    // Используем мьютекс для безопасного изменения переменной m_cancel.
+    QMutexLocker locker(&m_mutex);
+    m_cancel = true;
+}
+
+void WordCounterThread::run() {
+    progress_state = 0;
+    QMutexLocker locker(&m_mutex);
+    m_cancel = false; // Сброс флага отмены
+    locker.unlock();
+    emit processingStarted();
+    qDebug() << "Обработка начата: " << m_filePath;
+
+    for (int i = 0; i < 10; ++i) {
+        QMutexLocker locker(&m_mutex);
+        if (m_cancel) {
+            emit processingCancelled();
+            progress_state = 0;
+            qDebug() << "Обработка отменена.";
+            return;
+        }
+        locker.unlock();
+
+        // Имитация длительной работы
+        QThread::msleep(500); // Задержка 500 мс для имитации работы
+        progress_state = (i + 1) * 10;
+        emit processingProgress(progress_state);
+        qDebug() << "Обработка: шаг " << i + 1;
+    }
+
+    emit processingFinished();
+    qDebug() << "Обработка завершена.";
+}

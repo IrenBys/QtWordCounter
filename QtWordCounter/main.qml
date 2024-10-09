@@ -18,7 +18,9 @@ Window {
     Column {
         anchors.horizontalCenter: parent.horizontalCenter
         anchors.top: parent.top
-        padding: 10
+        anchors.topMargin: 10
+        anchors.bottom: parent.bottom
+        anchors.bottomMargin: 10
         spacing: 10
 
         Row {
@@ -26,8 +28,8 @@ Window {
 
             Button {
                 id: openButton
-                width: appWindow.width/2 - 2 * parent.spacing
-                height: textButton.height * 1.5
+                width: appWindow.width/3 - 2 * parent.spacing
+                height: textButton.height * 2
                 padding: textButton.height * 0.6
 
                 contentItem: Row {
@@ -44,8 +46,8 @@ Window {
                 }
 
                 background: Rectangle {
-                    color: "teal"
-                    radius: 2
+                    color: "#1DB93C"
+                    radius: 6
                 }
 
                 onClicked: {
@@ -92,8 +94,8 @@ Window {
                 }
 
                 background: Rectangle {
-                    color: "teal"
-                    radius: 2
+                    color: "#1DB93C"
+                    radius: 6
                 }
 
                 onClicked: {
@@ -103,6 +105,43 @@ Window {
 
             }
 
+            Button {
+                id: cancelButton
+                width: openButton.width
+                height: openButton.height
+                padding: openButton.padding
+
+                contentItem: Row {
+                    spacing: 5
+                    anchors.centerIn: parent
+
+                    Text {
+                        anchors.centerIn: parent
+                        text: qsTr("ОТМЕНА")
+                        font.bold: true
+                        color: "white"
+                    }
+                }
+
+                background: Rectangle {
+                    color: "#1DB93C"
+                    radius: 6
+                }
+
+                onClicked: {
+                    console.log("cancelButton")
+                    wordCounter.cancelProcessing()
+            }
+
         }
+        /*
+        ProgressBar {
+            id: progressBar
+            width: parent.width
+            height: 5
+            value: wordCounter.progress
+        }
+        */
     }
+}
 }

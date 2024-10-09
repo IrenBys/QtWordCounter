@@ -2,29 +2,39 @@
 #define WORDCOUNTERTHREAD_H
 
 #include <QThread>
-#include <QString>
+#include <QMutex>
 #include <QDebug>
+#include <QString>
 
-
-// Класс WordCounterThread наследует QThread и выполняет чтение и обработку файла в фоновом потоке.
+// Класс WordCounterThread наследует QThread и выполняет обработку файла в фоновом режиме.
 class WordCounterThread : public QThread {
     Q_OBJECT
 
 public:
-    // Конструктор принимает путь к файлу и передает его в поток.
-    explicit WordCounterThread(const QString& filePath, QObject* parent = nullptr);
+    explicit WordCounterThread(QObject *parent = nullptr);
+    ~WordCounterThread();
 
-    // Переопределение метода run(), который выполняется при запуске потока.
+    // Устанавливаем путь к файлу для обработки.
+    void setFilePath(const QString &filePath);
+
+    // Метод для остановки выполнения потока.
+    void stop();
+
+protected:
+    // Основной метод, выполняющийся при старте потока.
     void run() override;
 
 signals:
-    // Сигнал processingFinished() будет испущен, когда обработка завершится.
-    void processingFinished();
+    void processingStarted();    // Сигнал начала обработки.
+    void processingProgress(int progress); // Сигнал прогресса обработки (0-100).
+    void processingFinished();   // Сигнал завершения обработки.
+    void processingCancelled();  // Сигнал отмены обработки.
 
 private:
-    // Путь к файлу, который нужно обработать.
-    QString m_filePath;
+    QString m_filePath;          // Путь к файлу.
+    bool m_cancel;               // Флаг для управления остановкой потока.
+    QMutex m_mutex;              // Мьютекс для защиты доступа к m_cancel.
+    int progress_state;
 };
-
 
 #endif // WORDCOUNTERTHREAD_H

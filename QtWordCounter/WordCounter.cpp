@@ -1,61 +1,66 @@
 // WordCounter.cpp
 #include "WordCounter.h"
+
 #include <QFile>
+#include <QTimer>
 
-// Конструктор класса WordCounter.
-// Инициализирует m_thread значением nullptr, что означает, что поток еще не создан.
-WordCounter::WordCounter(QObject* parent)
-    : QObject(parent), m_thread(nullptr) {}
 
-// Деструктор класса WordCounter.
-// Если поток был создан, он завершает его работу, ожидает завершения и удаляет объект потока.
-WordCounter::~WordCounter() {
-    if (m_thread) {
-        m_thread->quit();  // Завершаем выполнение потока.
-        m_thread->wait();  // Ожидаем завершения потока.
-        delete m_thread;   // Удаляем объект потока, чтобы освободить память.
-    }
+WordCounter::WordCounter(QObject *parent) : QObject(parent), progress_state(0) {
+
+    m_workerThread = new WordCounterThread(this);
+
+    // Подключаем сигналы потока к сигналам этого класса для QML.
+    connect(m_workerThread, &WordCounterThread::processingStarted, this, &WordCounter::processingStarted);
+
+
+
+    connect(m_workerThread, &WordCounterThread::processingProgress, this, &WordCounter::processingProgress);
+
+
+
+    connect(m_workerThread, &WordCounterThread::processingFinished, this, &WordCounter::processingFinished);
+    connect(m_workerThread, &WordCounterThread::processingCancelled, this, &WordCounter::processingCancelled);
 }
 
-// Метод openFile() открывает диалоговое окно для выбора текстового файла и сохраняет путь к выбранному файлу.
+WordCounter::~WordCounter() {
+    m_workerThread->stop();
+    m_workerThread->wait(); // Ждем завершения потока.
+}
+
 void WordCounter::openFile(const QString &filePath) {
     QFile file(filePath);
-    if (file.open(QIODevice::ReadOnly)) {
+    if (!filePath.isEmpty()) {
         m_filePath = filePath;
-        qDebug() << "File" << m_filePath << "is open.";
+        m_workerThread->setFilePath(filePath);
+        emit fileSelected(filePath); // Уведомляем о выбранном файле.
+        qDebug() << "Файл выбран: " << filePath;
     } else {
-        qDebug() << "Failed to open file:" << filePath << "Error:" << file.errorString();
+        qDebug() << "Файл не выбран.";
     }
 }
 
-// Метод startProcessing() запускает новый поток для обработки файла.
 void WordCounter::startProcessing() {
-    // Проверяем, выбран ли файл. Если нет, выводим предупреждение и выходим из метода.
     if (m_filePath.isEmpty()) {
-        qDebug() << "Файл не выбран!";
+        qDebug() << "Файл не выбран.";
         return;
     }
 
-    // Если поток уже был создан, завершаем его и удаляем, чтобы создать новый.
-    if (m_thread) {
-        m_thread->quit();  // Завершаем работу текущего потока.
-        m_thread->wait();  // Ожидаем завершения потока.
-        delete m_thread;   // Удаляем объект потока.
-    }
+    m_workerThread->setFilePath(m_filePath);
+    qDebug() << "Запуск потока обработки.";
 
-    // Создаем новый объект WordCounterThread с текущим путем к файлу.
-    m_thread = new WordCounterThread(m_filePath, this);
-
-    // Подключаем сигнал завершения обработки потока к слоту onProcessingFinished().
-    connect(m_thread, &WordCounterThread::processingFinished, this, &WordCounter::onProcessingFinished);
-
-    // Запускаем выполнение потока.
-    m_thread->start();
+    m_workerThread->start(); // Запуск потока.
 }
 
-// Слот onProcessingFinished() вызывается, когда обработка файла завершена.
-void WordCounter::onProcessingFinished() {
-    // Выводим сообщение в консоль, что обработка завершена.
-    qDebug() << "Обработка завершена";
+void WordCounter::cancelProcessing() {
+    qDebug() << "Отмена обработки.";
+    m_workerThread->stop();
 }
+
+int WordCounter::progress() const {
+    return progress_state;
+}
+
+
+
+
 

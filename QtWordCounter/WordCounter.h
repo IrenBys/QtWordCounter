@@ -11,28 +11,30 @@ class WordCounter : public QObject {
     Q_OBJECT
 
 public:
-    // Конструктор создает объект класса и инициализирует указатель потока как nullptr.
     explicit WordCounter(QObject* parent = nullptr);
-
-    // Деструктор освобождает ресурсы, если поток был запущен.
     ~WordCounter();
+    int progress() const;
 
-    // Метод openFile() вызывается из QML для открытия диалога выбора файла.
-    Q_INVOKABLE void openFile(const QString &filePath);
+signals:
+    void processingStarted();
+    void processingProgress(int progress);
+    void processingFinished();
+    void processingCancelled();
+    void fileSelected(const QString &filePath);
 
-    // Метод startProcessing() вызывается из QML для запуска процесса чтения и обработки файла.
-    Q_INVOKABLE void startProcessing();
-
-private slots:
-    // Слот onProcessingFinished() вызывается при завершении обработки файла.
-    void onProcessingFinished();
+public slots:
+    void openFile(const QString& filePath);
+    void startProcessing();
+    void cancelProcessing();
 
 private:
     // Путь к выбранному файлу.
     QString m_filePath;
 
     // Указатель на объект потока.
-    WordCounterThread* m_thread;
+    WordCounterThread* m_workerThread;
+
+    int progress_state;
 };
 
 #endif // WORDCOUNTER_H
