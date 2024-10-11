@@ -14,7 +14,10 @@ WordCounter::WordCounter(QObject *parent) : QObject(parent), progress_state(0) {
 
 
 
-    connect(m_workerThread, &WordCounterThread::processingProgress, this, &WordCounter::processingProgress);
+    connect(m_workerThread, &WordCounterThread::processingProgress, this, [&](int progress) {
+        progress_state = progress;
+        emit processingProgress();
+    });
 
 
 
@@ -49,6 +52,7 @@ void WordCounter::startProcessing() {
     qDebug() << "Запуск потока обработки.";
 
     m_workerThread->start(); // Запуск потока.
+
 }
 
 void WordCounter::cancelProcessing() {
@@ -57,6 +61,7 @@ void WordCounter::cancelProcessing() {
 }
 
 int WordCounter::progress() const {
+    qDebug() << ("progress_state:") << progress_state;
     return progress_state;
 }
 

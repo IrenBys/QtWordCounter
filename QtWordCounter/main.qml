@@ -131,17 +131,18 @@ Window {
                 onClicked: {
                     console.log("cancelButton")
                     wordCounter.cancelProcessing()
+                }
             }
 
         }
-        /*
+
         ProgressBar {
             id: progressBar
             width: parent.width
-            height: 5
-            value: wordCounter.progress
+            height: 10
+            value: wordCounter.progress/100
         }
-        */
+
     }
 }
-}
+

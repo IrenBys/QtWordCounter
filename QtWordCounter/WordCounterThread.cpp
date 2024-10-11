@@ -39,10 +39,13 @@ void WordCounterThread::run() {
         // Имитация длительной работы
         QThread::msleep(500); // Задержка 500 мс для имитации работы
         progress_state = (i + 1) * 10;
+        qDebug() << ("progress_state run:") << progress_state;
         emit processingProgress(progress_state);
         qDebug() << "Обработка: шаг " << i + 1;
+
     }
 
     emit processingFinished();
     qDebug() << "Обработка завершена.";
+
 }
