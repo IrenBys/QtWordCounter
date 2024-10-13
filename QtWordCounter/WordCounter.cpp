@@ -5,7 +5,7 @@
 #include <QTimer>
 
 
-WordCounter::WordCounter(QObject *parent) : QObject(parent), progress_state(0) {
+WordCounter::WordCounter(QObject *parent) : QObject(parent), progress_state(0.0) {
 
     m_workerThread = new WordCounterThread(this);
 
@@ -35,7 +35,6 @@ void WordCounter::openFile(const QString &filePath) {
     if (!filePath.isEmpty()) {
         m_filePath = filePath;
         m_workerThread->setFilePath(filePath);
-        emit fileSelected(filePath); // Уведомляем о выбранном файле.
         qDebug() << "Файл выбран: " << filePath;
     } else {
         qDebug() << "Файл не выбран.";
@@ -60,7 +59,7 @@ void WordCounter::cancelProcessing() {
     m_workerThread->stop();
 }
 
-int WordCounter::progress() const {
+double WordCounter::progress() const {
     qDebug() << ("progress_state:") << progress_state;
     return progress_state;
 }

@@ -135,7 +135,6 @@ Window {
             }
 
         }
-
         ProgressBar {
             id: progressBar
             width: parent.width

@@ -9,19 +9,18 @@
 // Класс WordCounter предоставляет интерфейс для взаимодействия с QML и управляет потоком обработки файла.
 class WordCounter : public QObject {
     Q_OBJECT
-     Q_PROPERTY(int progress READ progress NOTIFY processingProgress)
+     Q_PROPERTY(double progress READ progress NOTIFY processingProgress)
 
 public:
     explicit WordCounter(QObject* parent = nullptr);
     ~WordCounter();
-    int progress() const;
+    double progress() const;
 
 signals:
     void processingStarted();
     void processingProgress();
     void processingFinished();
     void processingCancelled();
-    void fileSelected(const QString &filePath);
 
 public slots:
     void openFile(const QString& filePath);
@@ -35,7 +34,7 @@ private:
     // Указатель на объект потока.
     WordCounterThread* m_workerThread;
 
-    int progress_state;
+    double progress_state;
 };
 
 #endif // WORDCOUNTER_H

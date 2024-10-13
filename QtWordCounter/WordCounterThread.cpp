@@ -1,11 +1,13 @@
 #include "WordCounterThread.h"
+#include <QFile>
+#include <QRegularExpression>
 
 WordCounterThread::WordCounterThread(QObject *parent)
-    : QThread(parent), m_cancel(false), progress_state(0) {}
+    : QThread(parent), m_cancel(false), progress_state(0.0) {}
 
 WordCounterThread::~WordCounterThread() {
     stop();
-    wait(); // Ожидаем завершения потока.
+    wait();
 }
 
 void WordCounterThread::setFilePath(const QString &filePath) {
@@ -13,12 +15,12 @@ void WordCounterThread::setFilePath(const QString &filePath) {
 }
 
 void WordCounterThread::stop() {
-    // Используем мьютекс для безопасного изменения переменной m_cancel.
     QMutexLocker locker(&m_mutex);
     m_cancel = true;
 }
 
 void WordCounterThread::run() {
+    m_wordCount.clear();
     progress_state = 0;
     QMutexLocker locker(&m_mutex);
     m_cancel = false; // Сброс флага отмены
@@ -26,26 +28,81 @@ void WordCounterThread::run() {
     emit processingStarted();
     qDebug() << "Обработка начата: " << m_filePath;
 
-    for (int i = 0; i < 10; ++i) {
+    QFile f(m_filePath);
+    if (!f.open(QIODevice::ReadOnly)) {
+        qWarning() << "Не удалось открыть файл:" << m_filePath;
+        emit processingFinished();
+        return;
+    }
+
+    qint64 totalSize = f.size();
+    qint64 processedSize = 0;
+    qint64 bufferSize = 4096; // Размер буфера для чтения (4 КБ)
+    QByteArray buffer;
+    QTextStream textStream(&f);
+    static QRegularExpression reg_exp("[^a-zA-Zа-яА-ЯёЁ]+");
+
+
+    while (!textStream.atEnd()) {
         QMutexLocker locker(&m_mutex);
         if (m_cancel) {
-            emit processingCancelled();
-            progress_state = 0;
             qDebug() << "Обработка отменена.";
-            return;
+            emit processingCancelled();
+            progress_state = 0;            
+            emit processingProgress(progress_state);
+            break;
         }
         locker.unlock();
 
-        // Имитация длительной работы
-        QThread::msleep(500); // Задержка 500 мс для имитации работы
-        progress_state = (i + 1) * 10;
-        qDebug() << ("progress_state run:") << progress_state;
+        // Читаем порцию данных из файла
+        buffer = f.read(bufferSize);
+        processedSize += buffer.size();
+
+        // Обрабатываем считанный блок текста
+        QString chunk = QString::fromUtf8(buffer);
+        QStringList lines = chunk.split('\n');
+
+        for (QString &line : lines) {
+            const auto words = line.split(reg_exp, Qt::SkipEmptyParts);
+            for (const QString &word : words) {
+                m_wordCount[word.toLower().remove(reg_exp)] += 1;
+                QThread::msleep(100);
+            }
+        }
+
+        wordHighestResult(m_wordCount);
+
+        // Обновление прогресса
+        progress_state = static_cast<double>(processedSize) / totalSize * 100.0;
         emit processingProgress(progress_state);
-        qDebug() << "Обработка: шаг " << i + 1;
+
+        qDebug() << "processedSize" << processedSize;
+        qDebug() << "totalSize_run" << totalSize;
+        qDebug() << "progress_state_run" << progress_state;
 
     }
 
+    //emit processingProgress(100);
     emit processingFinished();
     qDebug() << "Обработка завершена.";
+    printHighestResult(m_vecWordCount, 15);
+    f.close();
 
 }
+
+void WordCounterThread::wordHighestResult(const QMap<QString, int> &countedWords) {
+    std::copy(countedWords.keyValueBegin(), countedWords.keyValueEnd(),
+              std::back_inserter<QList<pair>>(m_vecWordCount));
+    std::sort(m_vecWordCount.begin(), m_vecWordCount.end(),
+              [](const pair &l, const pair &r) { return l.second > r.second; });
+}
+
+void WordCounterThread::printHighestResult(const QList<pair> vec, qsizetype nResults)
+{
+    qDebug() << ("Most occurring words are:");
+    for (qsizetype i = 0; i < qMin(vec.size(), nResults); ++i) {
+        qDebug() << vec[i].first << " : " << vec[i].second;
+
+    }
+}
+
