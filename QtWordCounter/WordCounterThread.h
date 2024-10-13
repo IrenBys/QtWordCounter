@@ -5,6 +5,7 @@
 #include <QMutex>
 #include <QDebug>
 #include <QString>
+#include <QList>
 
 using pair = QPair<QString, int>;
 
@@ -18,10 +19,9 @@ public:
     void setFilePath(const QString &filePath);
     void stop();
     void wordHighestResult(const QMap<QString, int> &countedWords);
-    void printHighestResult(const QList<pair> vec, qsizetype nResults);
+    void printHighestResult();
 
 protected:
-    // Основной метод, выполняющийся при старте потока.
     void run() override;
 
 signals:
@@ -29,6 +29,7 @@ signals:
     void processingProgress(double progress);
     void processingFinished();
     void processingCancelled();
+    void processingWordCount(QList<pair> vecWordCount);
 
 private:
     QString m_filePath;

@@ -28,7 +28,7 @@ Window {
 
             Button {
                 id: openButton
-                width: appWindow.width/3 - 2 * parent.spacing
+                width: appWindow.width/4 - 2 * parent.spacing
                 height: textButton.height * 2
                 padding: textButton.height * 0.6
 
@@ -134,12 +134,41 @@ Window {
                 }
             }
 
+            Button {
+                id: testButton
+                width: openButton.width
+                height: openButton.height
+                padding: openButton.padding
+
+                contentItem: Row {
+                    spacing: 5
+                    anchors.centerIn: parent
+
+                    Text {
+                        anchors.centerIn: parent
+                        text: qsTr("test")
+                        font.bold: true
+                        color: "white"
+                    }
+                }
+
+                background: Rectangle {
+                    color: "#1DB93C"
+                    radius: 6
+                }
+
+                onClicked: {
+                    console.log("testButton")
+                    wordCounter.printList()
+                }
+            }
         }
+
         ProgressBar {
             id: progressBar
             width: parent.width
             height: 10
-            value: wordCounter.progress/100
+            value: wordCounter.getProgress/100
         }
 
     }
