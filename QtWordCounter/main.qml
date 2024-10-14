@@ -11,11 +11,11 @@ Window {
     visible: true
     title: qsTr("Word Counter")
 
+    property string filePath: ""
+
     WordCounter {
         id: wordCounter
     }
-
-    property string filePath: "" // Локальная переменная для хранения пути к файлу
 
     Column {
         anchors.horizontalCenter: parent.horizontalCenter
@@ -167,7 +167,6 @@ Window {
             }
         }
 
-        // Текст с информацией о выбранном файле и его статусе
         Text {
             id: fileInfoText
             width: parent.width
@@ -198,13 +197,11 @@ Window {
                     spacing: 5
 
                     Rectangle {
-                        // Ширина зависит от частоты текущего слова и масштабируется на ширину histogram
                         width: (modelData.count / (wordCounter.getWordHighestResult.length > 0 ? wordCounter.getWordHighestResult[0].count : 1)) * histogram.width
                         height: parent.height
                         color: "#1DB93C"
                         radius: 4
 
-                        // Текст внутри прямоугольника
                         Text {
                             text: modelData.word + " (" + modelData.count + ")"
                             color: "white"
@@ -216,7 +213,5 @@ Window {
                 }
             }
         }
-
     }
 }
-
