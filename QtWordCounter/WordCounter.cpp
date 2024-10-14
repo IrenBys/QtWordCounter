@@ -58,7 +58,7 @@ void WordCounter::startProcessing() {
     m_workerThread->setFilePath(m_filePath);
     qDebug() << "Запуск потока обработки.";
 
-    m_workerThread->start(); // Запуск потока.
+    m_workerThread->start();
 
 }
 
