@@ -15,6 +15,8 @@ Window {
         id: wordCounter
     }
 
+    property string filePath: "" // Локальная переменная для хранения пути к файлу
+
     Column {
         anchors.horizontalCenter: parent.horizontalCenter
         anchors.top: parent.top
@@ -62,7 +64,7 @@ Window {
                     onAccepted: {
                         console.log("fileDialog");
                         if(fileDialog.currentFile) {
-                            var filePath = fileDialog.currentFile.toString().replace("file:///", "")
+                            filePath = fileDialog.currentFile.toString().replace("file:///", "")
                             wordCounter.openFile(filePath)
                             console.log("File " + filePath + " is open")
                         } else {
@@ -131,6 +133,7 @@ Window {
                 onClicked: {
                     console.log("cancelButton")
                     wordCounter.cancelProcessing()
+                    filePath = "не выбран"
                 }
             }
 
@@ -164,11 +167,54 @@ Window {
             }
         }
 
+        // Текст с информацией о выбранном файле и его статусе
+        Text {
+            id: fileInfoText
+            width: parent.width
+            wrapMode: Text.WordWrap
+            text: filePath !== "" ? qsTr("Файл ") + filePath : qsTr("Файл не выбран")
+            color: "black"
+            font.pixelSize: 14
+            horizontalAlignment: Text.AlignHCenter
+        }
+
         ProgressBar {
             id: progressBar
             width: parent.width
             height: 10
             value: wordCounter.getProgress/100
+        }
+
+        Column {
+            id: histogram
+            width: parent.width
+            spacing: 5
+
+            Repeater {
+                model: wordCounter.getWordHighestResult
+                delegate: Row {
+                    width: histogram.width
+                    height: 30
+                    spacing: 5
+
+                    Rectangle {
+                        // Ширина зависит от частоты текущего слова и масштабируется на ширину histogram
+                        width: (modelData.count / (wordCounter.getWordHighestResult.length > 0 ? wordCounter.getWordHighestResult[0].count : 1)) * histogram.width
+                        height: parent.height
+                        color: "#1DB93C"
+                        radius: 4
+
+                        // Текст внутри прямоугольника
+                        Text {
+                            text: modelData.word + " (" + modelData.count + ")"
+                            color: "white"
+                            anchors.centerIn: parent
+                            elide: Text.ElideRight
+                            font.pixelSize: 12
+                        }
+                    }
+                }
+            }
         }
 
     }
