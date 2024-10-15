@@ -118,6 +118,7 @@ Window {
             width: appWindow.width - 4 * parent.spacing
             height: 10
             value: wordCounter.getProgress/100
+
         }
 
         CustomHistogram {
