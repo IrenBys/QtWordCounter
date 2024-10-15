@@ -72,7 +72,7 @@ void WordCounterThread::run() {
             const auto words = line.split(reg_exp, Qt::SkipEmptyParts);
             for (const QString &word : words) {
                 m_wordCount[word.toLower().remove(reg_exp)] += 1;
-                QThread::msleep(100);
+                //QThread::msleep(100);
             }
         }
         wordHighestResult(m_wordCount);
@@ -80,13 +80,6 @@ void WordCounterThread::run() {
 
         progress_state = static_cast<double>(processedSize) / totalSize * 100.0;
         emit processingProgress(progress_state);        
-
-
-        qDebug() << "processedSize" << processedSize;
-        qDebug() << "totalSize_run" << totalSize;
-        qDebug() << "progress_state_run" << progress_state;
-        qDebug() << "m_vecWordCount.size" << m_vecWordCount.size();
-
     }
 
     emit processingFinished();

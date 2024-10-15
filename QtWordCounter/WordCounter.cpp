@@ -68,12 +68,10 @@ void WordCounter::cancelProcessing() {
 }
 
 double WordCounter::getProgress() const {
-    qDebug() << "progress_state:" << progress_state;
     return progress_state;
 }
 
 QVariantList WordCounter::getWordHighestResult() const {
-    qDebug() << "getWordHighestResult";
     return m_listWordCount;
 }
 

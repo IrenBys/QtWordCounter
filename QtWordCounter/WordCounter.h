@@ -7,7 +7,6 @@
 #include <QVariant>
 #include "WordCounterThread.h"
 
-// Класс WordCounter предоставляет интерфейс для взаимодействия с QML и управляет потоком обработки файла.
 class WordCounter : public QObject {
     Q_OBJECT
     Q_PROPERTY(double getProgress READ getProgress NOTIFY processingProgress)

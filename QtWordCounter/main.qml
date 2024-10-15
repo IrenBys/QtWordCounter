@@ -17,6 +17,25 @@ Window {
         id: wordCounter
     }
 
+    FileDialog {
+        id: fileDialog
+        title: "Select a file"
+        nameFilters: ["Text files (*.txt)", "All files (*)"]
+        onAccepted: {
+            console.log("fileDialog");
+            if(fileDialog.currentFile) {
+                filePath = fileDialog.currentFile.toString().replace("file:///", "")
+                wordCounter.openFile(filePath)
+                console.log("File " + filePath + " is open")
+            } else {
+                console.log("No file selected.");
+            }
+        }
+        onRejected: {
+            console.log("File selection was canceled.")
+        }
+    }
+
     Column {
         anchors.horizontalCenter: parent.horizontalCenter
         anchors.top: parent.top
@@ -28,77 +47,19 @@ Window {
         Row {
             spacing: 10
 
-            Button {
+            CustomButton {
                 id: openButton
-                width: appWindow.width/4 - 2 * parent.spacing
-                height: textButton.height * 2
-                padding: textButton.height * 0.6
-
-                contentItem: Row {
-                    spacing: 5
-                    anchors.centerIn: parent
-
-                    Text {
-                        id: textButton
-                        anchors.centerIn: parent
-                        text: qsTr("ОТКРЫТЬ")
-                        font.bold: true
-                        color: "white"
-                    }
-                }
-
-                background: Rectangle {
-                    color: "#1DB93C"
-                    radius: 6
-                }
+                buttonText: qsTr("ОТКРЫТЬ")
 
                 onClicked: {
                     console.log("openButton")
                    fileDialog.open();
                 }
-
-                FileDialog {
-                    id: fileDialog
-                    title: "Select a file"
-                    nameFilters: ["Text files (*.txt)", "All files (*)"]
-                    onAccepted: {
-                        console.log("fileDialog");
-                        if(fileDialog.currentFile) {
-                            filePath = fileDialog.currentFile.toString().replace("file:///", "")
-                            wordCounter.openFile(filePath)
-                            console.log("File " + filePath + " is open")
-                        } else {
-                            console.log("No file selected.");
-                        }
-                    }
-                    onRejected: {
-                        console.log("File selection was canceled.")
-                    }
-                }
             }
 
-            Button {
+            CustomButton {
                 id: startButton
-                width: openButton.width
-                height: openButton.height
-                padding: openButton.padding
-
-                contentItem: Row {
-                    spacing: 5
-                    anchors.centerIn: parent
-
-                    Text {
-                        anchors.centerIn: parent
-                        text: qsTr("СТАРТ")
-                        font.bold: true
-                        color: "white"
-                    }
-                }
-
-                background: Rectangle {
-                    color: "#1DB93C"
-                    radius: 6
-                }
+                buttonText: qsTr("СТАРТ")
 
                 onClicked: {
                     console.log("startButton")
@@ -107,28 +68,9 @@ Window {
 
             }
 
-            Button {
+            CustomButton {
                 id: cancelButton
-                width: openButton.width
-                height: openButton.height
-                padding: openButton.padding
-
-                contentItem: Row {
-                    spacing: 5
-                    anchors.centerIn: parent
-
-                    Text {
-                        anchors.centerIn: parent
-                        text: qsTr("ОТМЕНА")
-                        font.bold: true
-                        color: "white"
-                    }
-                }
-
-                background: Rectangle {
-                    color: "#1DB93C"
-                    radius: 6
-                }
+                buttonText: qsTr("ОТМЕНА")
 
                 onClicked: {
                     console.log("cancelButton")
@@ -136,78 +78,55 @@ Window {
                     filePath = "не выбран"
                 }
             }
-
-            Button {
-                id: testButton
-                width: openButton.width
-                height: openButton.height
-                padding: openButton.padding
-
-                contentItem: Row {
-                    spacing: 5
-                    anchors.centerIn: parent
-
-                    Text {
-                        anchors.centerIn: parent
-                        text: qsTr("test")
-                        font.bold: true
-                        color: "white"
-                    }
-                }
-
-                background: Rectangle {
-                    color: "#1DB93C"
-                    radius: 6
-                }
-
-                onClicked: {
-                    console.log("testButton")
-                    wordCounter.printList()
-                }
-            }
         }
 
         Text {
             id: fileInfoText
-            width: parent.width
+            width: appWindow.width - 4 * parent.spacing
             wrapMode: Text.WordWrap
             text: filePath !== "" ? qsTr("Файл ") + filePath : qsTr("Файл не выбран")
-            color: "black"
+            color: "grey"
             font.pixelSize: 14
             horizontalAlignment: Text.AlignHCenter
         }
 
         ProgressBar {
             id: progressBar
-            width: parent.width
+            width: appWindow.width - 4 * parent.spacing
             height: 10
             value: wordCounter.getProgress/100
         }
 
-        Column {
-            id: histogram
-            width: parent.width
-            spacing: 5
+        ScrollView {
+            id: scrollView
+            width: appWindow.width - 4 * parent.spacing
+            height: appWindow.height - openButton.height - fileInfoText.height - progressBar.height  - 5 * parent.spacing
 
-            Repeater {
-                model: wordCounter.getWordHighestResult
-                delegate: Row {
-                    width: histogram.width
-                    height: 30
-                    spacing: 5
+            Column {
+                id: histogram
+                width: scrollView.width - 10
+                spacing: 5
 
-                    Rectangle {
-                        width: (modelData.count / (wordCounter.getWordHighestResult.length > 0 ? wordCounter.getWordHighestResult[0].count : 1)) * histogram.width
-                        height: parent.height
-                        color: "#1DB93C"
-                        radius: 4
+                Repeater {
+                    model: wordCounter.getWordHighestResult
+                    delegate: Row {
+                        width: histogram.width
+                        height: 34
+                        spacing: 5
 
-                        Text {
-                            text: modelData.word + " (" + modelData.count + ")"
-                            color: "white"
-                            anchors.centerIn: parent
-                            elide: Text.ElideRight
-                            font.pixelSize: 12
+                        Rectangle {
+                            width: (modelData.count / (wordCounter.getWordHighestResult.length > 0 ? wordCounter.getWordHighestResult[0].count : 1)) * histogram.width
+                            height: parent.height
+                            color: "#1DB93C"
+                            radius: 4
+
+                            Text {
+                                text: modelData.word + " (" + modelData.count + ")"
+                                color: "white"
+                                anchors.centerIn: parent
+                                elide: Text.ElideRight
+                                font.pixelSize: 12
+                            }
                         }
                     }
                 }

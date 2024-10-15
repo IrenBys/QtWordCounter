@@ -26,3 +26,5 @@ else: unix:!android: target.path = /opt/$${TARGET}/bin
 HEADERS += \
     WordCounter.h \
     WordCounterThread.h
+
+DISTFILES +=
