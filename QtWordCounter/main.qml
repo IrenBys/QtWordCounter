@@ -11,6 +11,9 @@ Window {
     visible: true
     title: qsTr("Word Counter")
 
+    minimumHeight: header.height + openButton.height + fileInfoText.height + progressBar.height + footer.height + 100
+    minimumWidth: 3*openButton.width
+
     property string filePath: ""
 
     WordCounter {
@@ -36,12 +39,34 @@ Window {
         }
     }
 
+    Rectangle {
+        id: header
+        width: parent.width
+        height: openButton.height
+        color: "light grey"
+
+        Row {
+            anchors.centerIn: parent
+            spacing: 10
+
+            Text {
+                id: appTitle
+                text: qsTr("Word Counter")
+                color: "white"
+                font.bold: true
+                font.pixelSize: 14
+            }
+
+        }
+    }
+
+
     Column {
         anchors.horizontalCenter: parent.horizontalCenter
-        anchors.top: parent.top
-        anchors.topMargin: 10
-        anchors.bottom: parent.bottom
-        anchors.bottomMargin: 10
+        anchors.top: header.bottom
+        anchors.topMargin: spacing
+        anchors.bottom: footer.top
+        anchors.bottomMargin: spacing
         spacing: 10
 
         Row {
@@ -95,42 +120,36 @@ Window {
             width: appWindow.width - 4 * parent.spacing
             height: 10
             value: wordCounter.getProgress/100
+
         }
 
-        ScrollView {
-            id: scrollView
+        CustomHistogram {
+            id: histogramComponent
+            wordCounter: wordCounter
             width: appWindow.width - 4 * parent.spacing
-            height: appWindow.height - openButton.height - fileInfoText.height - progressBar.height  - 5 * parent.spacing
+            height: appWindow.height - header.height - openButton.height - fileInfoText.height - progressBar.height - footer.height - 5 * parent.spacing
+        }
+    }
 
-            Column {
-                id: histogram
-                width: scrollView.width - 10
-                spacing: 5
+    Rectangle {
+        id: footer
+        width: parent.width
+        height: openButton.height
+        anchors.bottom: parent.bottom
+        color: "light grey"
 
-                Repeater {
-                    model: wordCounter.getWordHighestResult
-                    delegate: Row {
-                        width: histogram.width
-                        height: 34
-                        spacing: 5
+        Row {
+            anchors.centerIn: parent
+            spacing: 20
 
-                        Rectangle {
-                            width: (modelData.count / (wordCounter.getWordHighestResult.length > 0 ? wordCounter.getWordHighestResult[0].count : 1)) * histogram.width
-                            height: parent.height
-                            color: "#1DB93C"
-                            radius: 4
-
-                            Text {
-                                text: modelData.word + " (" + modelData.count + ")"
-                                color: "white"
-                                anchors.centerIn: parent
-                                elide: Text.ElideRight
-                                font.pixelSize: 12
-                            }
-                        }
-                    }
-                }
+            Text {
+                id: footerText
+                text: qsTr("Test task for 2GIS")
+                color: "white"
+                font.bold: true
+                font.pixelSize: 14
             }
+
         }
     }
 }
