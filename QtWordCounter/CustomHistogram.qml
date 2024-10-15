@@ -22,7 +22,7 @@ Item {
                 model: wordCounter.getWordHighestResult
                 delegate: Row {
                     width: histogram.width
-                    height: 34
+                    height: 30
                     spacing: 5
 
                     Rectangle {
