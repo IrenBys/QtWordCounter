@@ -5,7 +5,8 @@
 #include <QTimer>
 
 
-WordCounter::WordCounter(QObject *parent) : QObject(parent), progress_state(0.0) {
+WordCounter::WordCounter(QObject *parent) :
+    QObject(parent), progress_state(0.0) {
 
     m_workerThread = new WordCounterThread(this);
 

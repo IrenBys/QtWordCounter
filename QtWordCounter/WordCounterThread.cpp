@@ -3,7 +3,10 @@
 #include <QRegularExpression>
 
 WordCounterThread::WordCounterThread(QObject *parent)
-    : QThread(parent), m_cancel(false), progress_state(0.0) {}
+    : QThread(parent),
+    m_filePath(""),
+    m_cancel(false),
+    progress_state(0.0) {}
 
 WordCounterThread::~WordCounterThread() {
     stop();
@@ -17,6 +20,14 @@ void WordCounterThread::setFilePath(const QString &filePath) {
 void WordCounterThread::stop() {
     QMutexLocker locker(&m_mutex);
     m_cancel = true;
+    qDebug() << "Обработка отменена.";
+    emit processingCancelled();
+
+    progress_state = 0;
+    emit processingProgress(progress_state);
+
+    m_vecWordCount.clear();
+    emit processingWordCount(m_vecWordCount);
 }
 
 void WordCounterThread::run() {
@@ -73,15 +84,14 @@ void WordCounterThread::run() {
             const auto words = line.split(reg_exp, Qt::SkipEmptyParts);
             for (const QString &word : words) {
                 m_wordCount[word.toLower().remove(reg_exp)] += 1;
-                //QThread::msleep(100);
             }
         }
         wordHighestResult(m_wordCount);
-        //emit processingWordCount(m_vecWordCount);
 
         progress_state = static_cast<double>(processedSize) / totalSize * 100.0;
         emit processingProgress(progress_state);        
     }
+
 
     emit processingFinished();
     qDebug() << "Обработка завершена.";
