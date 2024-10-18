@@ -56,7 +56,6 @@ Window {
                 font.bold: true
                 font.pixelSize: 14
             }
-
         }
     }
 
