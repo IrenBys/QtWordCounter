@@ -20,6 +20,7 @@ void WordCounterThread::stop() {
 }
 
 void WordCounterThread::run() {
+    m_vecWordCount.clear();
     m_wordCount.clear();
     progress_state = 0;
 
@@ -76,7 +77,7 @@ void WordCounterThread::run() {
             }
         }
         wordHighestResult(m_wordCount);
-        emit processingWordCount(m_vecWordCount);
+        //emit processingWordCount(m_vecWordCount);
 
         progress_state = static_cast<double>(processedSize) / totalSize * 100.0;
         emit processingProgress(progress_state);        
@@ -103,6 +104,8 @@ void WordCounterThread::wordHighestResult(const QMap<QString, int> &countedWords
     if (m_vecWordCount.size() > 15) {
         m_vecWordCount.erase(m_vecWordCount.begin() + 15, m_vecWordCount.end());
     }
+
+    emit processingWordCount(m_vecWordCount);
 }
 
 void WordCounterThread::printHighestResult()
